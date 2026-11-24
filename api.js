@@ -107,10 +107,109 @@ var WasteWise = (function () {
     });
   }
 
+  /* -------------------------------------------------------- when was it taken */
+
+  /**
+   * Read DateTimeOriginal out of a JPEG's EXIF block.
+   *
+   * A photo chosen from the gallery might be from this morning or from last
+   * month, and management needs to tell the difference before sending someone
+   * to look. Resolves to '' when the photo carries no EXIF (screenshots,
+   * stripped images, some chat apps), and never rejects — a missing timestamp
+   * must not cost the resident their report.
+   *
+   * @returns {Promise<string>} "2026-11-24T08:42:11" or ''
+   */
+  function takenAt(file) {
+    return new Promise(function (resolve) {
+      if (!file || !/jpe?g/i.test(file.type)) return resolve('');
+
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          resolve(parseExifDate(new DataView(reader.result)));
+        } catch (e) {
+          resolve('');
+        }
+      };
+      reader.onerror = function () { resolve(''); };
+      /* EXIF sits near the front of the file, so 128 KB is plenty and we never
+         read a 5 MB photo into memory twice. */
+      reader.readAsArrayBuffer(file.slice(0, 131072));
+    });
+  }
+
+  function parseExifDate(view) {
+    if (view.byteLength < 4 || view.getUint16(0) !== 0xFFD8) return '';
+
+    var offset = 2;
+    while (offset + 4 <= view.byteLength) {
+      if (view.getUint8(offset) !== 0xFF) break;
+
+      var marker = view.getUint8(offset + 1);
+      if (marker === 0xE1) return readExifSegment(view, offset + 4);
+      if (marker === 0xDA) break;             /* start of scan: no metadata past here */
+
+      var size = view.getUint16(offset + 2);
+      if (size < 2) break;
+      offset += 2 + size;
+    }
+    return '';
+  }
+
+  function readExifSegment(view, start) {
+    if (start + 8 > view.byteLength) return '';
+    if (view.getUint32(start) !== 0x45786966) return '';   /* "Exif" */
+
+    var tiff = start + 6;
+    var little = view.getUint16(tiff) === 0x4949;          /* "II" = little-endian */
+    if (view.getUint32(tiff + 4, little) !== 8) return '';
+
+    var dir = tiff + 8;
+    var count = view.getUint16(dir, little);
+
+    for (var i = 0; i < count; i++) {
+      var entry = dir + 2 + i * 12;
+      if (entry + 12 > view.byteLength) break;
+
+      /* 0x8769 is the pointer to the Exif sub-IFD, where the dates live. */
+      if (view.getUint16(entry, little) !== 0x8769) continue;
+
+      var sub = tiff + view.getUint32(entry + 8, little);
+      if (sub + 2 > view.byteLength) return '';
+      var subCount = view.getUint16(sub, little);
+
+      for (var j = 0; j < subCount; j++) {
+        var e = sub + 2 + j * 12;
+        if (e + 12 > view.byteLength) break;
+
+        var tag = view.getUint16(e, little);
+        if (tag !== 0x9003 && tag !== 0x9004) continue;    /* Original / Digitized */
+
+        var at = tiff + view.getUint32(e + 8, little);
+        if (at + 19 > view.byteLength) return '';
+
+        var text = '';
+        for (var k = 0; k < 19; k++) text += String.fromCharCode(view.getUint8(at + k));
+        return normaliseExifDate(text);
+      }
+    }
+    return '';
+  }
+
+  /** EXIF writes "2026:11:24 08:42:11"; everything else expects ISO. */
+  function normaliseExifDate(text) {
+    var m = /^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/.exec(text);
+    if (!m) return '';
+    if (m[1] === '0000') return '';
+    return m[1] + '-' + m[2] + '-' + m[3] + 'T' + m[4] + ':' + m[5] + ':' + m[6];
+  }
+
   /* ---------------------------------------------------------------- public */
 
   /**
-   * @param {{hotspot:string, problem:string, file?:File, plate?:string}} report
+   * @param {{hotspot:string, problem:string, file?:File, plate?:string,
+   *          source?:'camera'|'gallery'}} report
    * @returns {Promise<{ok:boolean, reportNo?:number, error?:string}>}
    */
   function submit(report) {
@@ -118,17 +217,19 @@ var WasteWise = (function () {
       return Promise.reject(new Error('hotspot and problem are required'));
     }
 
-    var photoStep = report.file
-      ? compress(report.file)
-      : Promise.resolve('');
+    var steps = report.file
+      ? [compress(report.file), takenAt(report.file)]
+      : [Promise.resolve(''), Promise.resolve('')];
 
-    return photoStep.then(function (base64) {
+    return Promise.all(steps).then(function (out) {
       return post({
         action: 'submit',
         hotspot: report.hotspot,
         problem: report.problem,
         plate: report.plate || '',
-        photo: base64
+        photo: out[0],
+        source: report.source === 'gallery' ? 'gallery' : 'camera',
+        takenAt: out[1]
       });
     });
   }
@@ -168,6 +269,7 @@ var WasteWise = (function () {
     status: status,
     addPlate: addPlate,
     compress: compress,
+    takenAt: takenAt,
     remember: remember,
     mine: mine
   };

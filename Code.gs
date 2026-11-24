@@ -25,9 +25,13 @@ var TELEGRAM_CHAT_ID = '';
 
 var STATUSES = ['New', 'Received', 'Assigned', 'Cleared', 'Not found'];
 
+/* Append new columns at the END. addPlate() writes column 6 by position, so
+   inserting anywhere earlier would silently write the plate into the wrong
+   column. */
 var HEADERS = [
   'Report no.', 'Sent at', 'Hotspot', 'Problem', 'Photo',
-  'Vehicle plate', 'Status', 'Assigned to', 'Cleared at', 'Notes'
+  'Vehicle plate', 'Status', 'Assigned to', 'Cleared at', 'Notes',
+  'Photo taken', 'Photo from'
 ];
 
 /* ------------------------------------------------------------------ setup */
@@ -121,6 +125,11 @@ function submitReport(body) {
   var problem = String(body.problem || '').slice(0, 120);
   var plate   = String(body.plate   || '').slice(0, 20);
 
+  /* A gallery photo may be days old and from somewhere else, so management
+     needs to see where it came from before sending anyone to look. */
+  var source = body.source === 'gallery' ? 'Gallery' : 'Camera';
+  var taken = parseTaken(body.takenAt);
+
   if (!hotspot || !problem) {
     return { ok: false, error: 'Missing hotspot or problem' };
   }
@@ -153,15 +162,25 @@ function submitReport(body) {
       photoUrl ? '=HYPERLINK("' + photoUrl + '","Open photo")' : '',
       plate,
       'New',
-      '', '', ''
+      '', '', '',
+      taken,
+      source
     ]);
 
-    notifyTelegram(reportNo, hotspot, problem, plate, photoBlob && photoBlob.blob);
+    notifyTelegram(reportNo, hotspot, problem, plate,
+                   photoBlob && photoBlob.blob, source, taken);
 
     return { ok: true, reportNo: reportNo, sentAt: now.toISOString() };
   } finally {
     lock.releaseLock();
   }
+}
+
+/** EXIF dates carry no timezone, so these land in the script's timezone. */
+function parseTaken(value) {
+  if (!value) return '';
+  var d = new Date(value);
+  return isNaN(d.getTime()) ? '' : d;
 }
 
 function savePhoto(base64, reportNo, when) {
@@ -244,13 +263,21 @@ function toIso(value) {
  * do not have to open anything. Photo bytes go straight to Telegram, which
  * means the Drive file can stay private.
  */
-function notifyTelegram(reportNo, hotspot, problem, plate, blob) {
+function notifyTelegram(reportNo, hotspot, problem, plate, blob, source, taken) {
   if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) return;
+
+  var age = '';
+  if (source === 'Gallery') {
+    age = taken
+      ? '\nFrom the gallery, taken ' +
+        Utilities.formatDate(taken, Session.getScriptTimeZone(), 'd MMM, h:mm a')
+      : '\nFrom the gallery — age unknown';
+  }
 
   var caption =
     'Report no. ' + reportNo + '\n' +
     problem + '\n' +
-    hotspot +
+    hotspot + age +
     (plate ? '\nVehicle: ' + plate + ' (read from photo, not verified)' : '');
 
   try {

@@ -187,6 +187,16 @@
   }
   .plabel { font-size: 15px; font-weight: 700; }
 
+  .pick {
+    width: 100%; min-height: 62px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    border: 1px solid var(--line); border-radius: 16px;
+    background: var(--sunken); color: var(--ink);
+    font-family: inherit; font-size: 17px; font-weight: 700; cursor: pointer;
+  }
+  .pick .ico { flex: 0 0 auto; color: var(--primary); }
+  .pick:active { background: var(--line); }
+
   .shot {
     width: 100%; aspect-ratio: 4 / 3; max-width: 100%;
     border-radius: 18px; overflow: hidden;
@@ -429,6 +439,11 @@
         Tap here
       </button>
 
+      <button class="pick" id="pickGallery">
+        <svg class="ico" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.6" width="18" height="14.8" rx="2.4"/><circle cx="8.6" cy="9.6" r="1.7"/><path d="M3.4 16.6l4.8-4.2 3.4 2.8 3-2.4 6 5"/></svg>
+        Choose from gallery
+      </button>
+
       <div class="here">
         <svg class="pin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 10-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
         <div>
@@ -508,6 +523,11 @@
           <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h3.1l1.4-2.2h9L18 8.5H21v11H3z"/><circle cx="12" cy="14" r="3.4"/></svg>
         </span>
         <span class="plabel">Tap here</span>
+      </button>
+
+      <button class="pick" id="pickPlateGallery">
+        <svg class="ico" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.6" width="18" height="14.8" rx="2.4"/><circle cx="8.6" cy="9.6" r="1.7"/><path d="M3.4 16.6l4.8-4.2 3.4 2.8 3-2.4 6 5"/></svg>
+        Choose from gallery
       </button>
 
       <p class="hint">Get close enough that the letters fill the box. The photo stays on your phone &mdash; only the plate number is sent with your report.</p>
@@ -669,8 +689,22 @@
       if (t) show(t);
     });
 
-    document.getElementById('shoot').addEventListener('click', function () { show('kind'); });
-    document.getElementById('retake').addEventListener('click', function () { show('photo'); });
+    /* A camera photo is by definition from just now; a gallery photo carries
+       its own date, which is what management needs to see. */
+    var kindShot = document.querySelector('#s-kind .shot');
+    var retakeBtn = document.getElementById('retake');
+
+    function usePhoto(source) {
+      kindShot.setAttribute('data-stamp', source === 'gallery'
+        ? 'Main Bin Area · taken 22 Nov, 7:14 AM'
+        : 'Main Bin Area · 8:42 AM');
+      retakeBtn.textContent = source === 'gallery' ? 'Change' : 'Retake';
+      show('kind');
+    }
+
+    document.getElementById('shoot').addEventListener('click', function () { usePhoto('camera'); });
+    document.getElementById('pickGallery').addEventListener('click', function () { usePhoto('gallery'); });
+    retakeBtn.addEventListener('click', function () { show('photo'); });
 
     /* step 2: problem type */
     var sendBtn = document.getElementById('send');
@@ -699,6 +733,7 @@
     var found = null;
 
     document.getElementById('shootPlate').addEventListener('click', function () { show('plate'); });
+    document.getElementById('pickPlateGallery').addEventListener('click', function () { show('plate'); });
     document.getElementById('retakePlate').addEventListener('click', function () { show('vehicle'); });
 
     function startRead() {

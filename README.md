@@ -126,6 +126,20 @@ Working out of the Sheet, they only ever touch two columns:
 - **Status** — a dropdown: New → Received → Assigned → Cleared
 - **Assigned to** — who is doing it
 
+Two columns they only read, both about the photo:
+
+- **Photo from** — `Camera` means taken in the app just now. `Gallery` means
+  chosen from the phone's photo roll, so it could be from any time or place.
+- **Photo taken** — the photo's own EXIF timestamp, when it has one. A gallery
+  photo with no timestamp here deserves more scepticism than one dated this
+  morning.
+
+> If you already ran `setup()` before these two columns existed, either add
+> `Photo taken` and `Photo from` as columns K and L by hand, or clear the sheet
+> and run `setup()` again. Add them at the **end** — `addPlate()` writes the
+> plate to column 6 by position, so inserting a column earlier would put plates
+> in the wrong place.
+
 The resident's "Check your report" screen reads those straight back, which is
 what closes the loop. No separate dashboard exists, and that is deliberate:
 one fewer thing for anyone to learn, and one fewer thing for you to maintain
