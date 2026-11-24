@@ -1,0 +1,554 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>WasteWise Connect</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
+
+<style>
+  /* Layout: one phone, centred. One task per screen, giant targets, no typing anywhere. */
+  :root {
+    --bg: #EDF1EC;
+    --surface: #FFFFFF;
+    --sunken: #F4F7F3;
+    --ink: #131F19;
+    --ink-2: #516057;
+    --ink-3: #7C8B82;
+    --line: #D4DBD4;
+    --primary: #16684A;
+    --primary-ink: #FFFFFF;
+    --primary-soft: #DAEBE1;
+    --primary-line: #A9CDB8;
+    --warn-soft: #FBF0D8;
+    --warn-ink: #78541A;
+    --warn-line: #E3CE9F;
+    --shadow: 0 1px 2px rgba(19,31,25,.07), 0 10px 30px rgba(19,31,25,.08);
+    --font-ui: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0D1411;
+      --surface: #19221E;
+      --sunken: #141C19;
+      --ink: #E9F0EB;
+      --ink-2: #A3B2A9;
+      --ink-3: #7F8E85;
+      --line: #2B3832;
+      --primary: #4FB98A;
+      --primary-ink: #04150D;
+      --primary-soft: #16302A;
+      --primary-line: #2C5847;
+      --warn-soft: #2B2412;
+      --warn-ink: #E6C382;
+      --warn-line: #4A3D1D;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0D1411;
+    --surface: #19221E;
+    --sunken: #141C19;
+    --ink: #E9F0EB;
+    --ink-2: #A3B2A9;
+    --ink-3: #7F8E85;
+    --line: #2B3832;
+    --primary: #4FB98A;
+    --primary-ink: #04150D;
+    --primary-soft: #16302A;
+    --primary-line: #2C5847;
+    --warn-soft: #2B2412;
+    --warn-ink: #E6C382;
+    --warn-line: #4A3D1D;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    margin: 0;
+  }
+  * { box-sizing: border-box; }
+
+  .page {
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 32px 40px;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ---------- phone ---------- */
+  .phone {
+    position: relative;
+    width: 100%;
+    max-width: 390px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 26px;
+    box-shadow: var(--shadow);
+    height: min(718px, 84vh);
+    min-height: 568px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .bar {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+    min-height: 58px;
+  }
+  .bar-title { font-size: 16px; font-weight: 800; letter-spacing: -.01em; min-width: 0; }
+  .bar-title small { display: block; font-size: 11px; font-weight: 400; color: var(--ink-3); letter-spacing: 0; }
+  .back {
+    flex: 0 0 auto;
+    width: 44px; height: 44px;
+    display: grid; place-items: center;
+    border: 1px solid var(--line); border-radius: 14px;
+    background: var(--sunken); color: var(--ink);
+    cursor: pointer;
+  }
+  .back:active { background: var(--line); }
+
+  .screen {
+    flex: 1 1 auto; min-height: 0;
+    overflow-y: auto;
+    padding: 18px 16px 22px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  /* ---------- where you are ---------- */
+  .here {
+    background: var(--primary-soft);
+    border: 1px solid var(--primary-line);
+    border-radius: 16px;
+    padding: 14px 15px;
+    display: flex; gap: 12px; align-items: center;
+  }
+  .here .pin { flex: 0 0 auto; color: var(--primary); }
+  .here .lbl { font-size: 11.5px; font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: .07em; }
+  .here .val { font-size: 18px; font-weight: 800; letter-spacing: -.01em; line-height: 1.2; margin-top: 2px; }
+  .here .sub { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; }
+
+  /* ---------- giant buttons ---------- */
+  .big {
+    width: 100%;
+    min-height: 92px;
+    display: flex; align-items: center; gap: 15px;
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px solid transparent;
+    font-family: inherit; font-size: 22px; font-weight: 800; letter-spacing: -.01em;
+    text-align: left; cursor: pointer;
+    background: var(--primary); color: var(--primary-ink);
+    line-height: 1.15;
+  }
+  .big small { display: block; font-size: 13px; font-weight: 400; opacity: .82; letter-spacing: 0; margin-top: 3px; }
+  .big .ico { flex: 0 0 auto; }
+  .big:active { transform: translateY(1px); }
+  .big.quiet {
+    background: var(--sunken); color: var(--ink); border-color: var(--line);
+  }
+  .big.quiet .ico { color: var(--primary); }
+
+  /* ---------- steps ---------- */
+  .steps { display: flex; align-items: center; gap: 8px; }
+  .steps span { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .dots { display: flex; gap: 5px; margin-left: auto; }
+  .dots i { width: 22px; height: 6px; border-radius: 3px; background: var(--line); display: block; }
+  .dots i.on { background: var(--primary); }
+
+  .ask {
+    font-size: 25px; font-weight: 800; letter-spacing: -.02em;
+    line-height: 1.2; margin: 0; text-wrap: balance;
+  }
+
+  /* camera target */
+  .shoot {
+    width: 100%; aspect-ratio: 4 / 3; max-width: 100%;
+    border-radius: 18px;
+    border: 2px dashed var(--primary-line);
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    font-family: inherit; font-size: 20px; font-weight: 800;
+    cursor: pointer;
+  }
+  .shoot:active { background: var(--primary-line); }
+
+  .shot {
+    width: 100%; aspect-ratio: 4 / 3; max-width: 100%;
+    border-radius: 18px; overflow: hidden;
+    border: 1px solid var(--line);
+    position: relative;
+    background:
+      radial-gradient(42% 46% at 26% 72%, #6F6A4E 0%, rgba(111,106,78,0) 62%),
+      radial-gradient(34% 36% at 69% 63%, #8A7F63 0%, rgba(138,127,99,0) 60%),
+      radial-gradient(28% 30% at 48% 86%, #4F5240 0%, rgba(79,82,64,0) 58%),
+      linear-gradient(176deg, #9BA69B 0%, #7D8A80 44%, #5B6459 100%);
+  }
+  .shot::after {
+    content: attr(data-stamp);
+    position: absolute; left: 10px; bottom: 9px;
+    font-size: 11px; font-weight: 600; letter-spacing: .02em;
+    color: #fff; background: rgba(12,20,16,.6);
+    padding: 4px 8px; border-radius: 7px;
+  }
+  .shot .retake {
+    position: absolute; top: 9px; right: 9px;
+    border: 0; border-radius: 10px; cursor: pointer;
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    padding: 9px 12px;
+    background: rgba(255,255,255,.93); color: #131F19;
+  }
+
+  /* three picture choices */
+  .choices { display: grid; gap: 10px; }
+  .choice {
+    display: flex; align-items: center; gap: 14px;
+    width: 100%; min-height: 76px; padding: 14px 15px;
+    border: 2px solid var(--line); border-radius: 16px;
+    background: var(--surface); color: var(--ink);
+    font-family: inherit; font-size: 18px; font-weight: 700; letter-spacing: -.01em;
+    text-align: left; cursor: pointer; line-height: 1.2;
+  }
+  .choice small { display: block; font-size: 12.5px; font-weight: 400; color: var(--ink-3); margin-top: 3px; }
+  .choice .ico { flex: 0 0 auto; color: var(--ink-2); }
+  .choice[aria-pressed="true"] {
+    border-color: var(--primary); background: var(--primary-soft);
+  }
+  .choice[aria-pressed="true"] .ico { color: var(--primary); }
+  .choice .tick { margin-left: auto; color: var(--primary); display: none; flex: 0 0 auto; }
+  .choice[aria-pressed="true"] .tick { display: block; }
+
+  .send {
+    width: 100%; min-height: 68px; margin-top: auto;
+    border: 0; border-radius: 18px; cursor: pointer;
+    background: var(--primary); color: var(--primary-ink);
+    font-family: inherit; font-size: 23px; font-weight: 800; letter-spacing: -.01em;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .send[disabled] { background: var(--line); color: var(--ink-3); cursor: default; }
+
+  /* done */
+  .done { text-align: center; padding-top: 18px; }
+  .seal {
+    width: 96px; height: 96px; margin: 0 auto 18px;
+    border-radius: 50%;
+    background: var(--primary); color: var(--primary-ink);
+    display: grid; place-items: center;
+  }
+  .done h2 { font-size: 28px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px; }
+  .done .no {
+    font-size: 15px; font-weight: 700; color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .done p { font-size: 16px; color: var(--ink-2); line-height: 1.55; margin: 14px 0 0; }
+
+  /* schedule */
+  .slab {
+    border: 1px solid var(--line); border-radius: 16px;
+    background: var(--sunken); padding: 16px;
+  }
+  .slab .lbl { font-size: 11.5px; font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: .07em; }
+  .slab .huge {
+    font-size: 33px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-top: 5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .slab .sub { font-size: 14.5px; color: var(--ink-2); margin-top: 6px; line-height: 1.45; }
+  .notice {
+    border: 1px solid var(--warn-line); background: var(--warn-soft); color: var(--warn-ink);
+    border-radius: 16px; padding: 14px 15px;
+    display: flex; gap: 12px; align-items: flex-start;
+    font-size: 15px; font-weight: 600; line-height: 1.45;
+  }
+  .notice .ico { flex: 0 0 auto; margin-top: 1px; }
+  .notice small { display: block; font-weight: 400; opacity: .85; margin-top: 3px; font-size: 12.5px; }
+
+  /* how-to list */
+  ul.howto { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .howto li {
+    display: flex; gap: 13px; align-items: center;
+    padding: 14px 4px; border-bottom: 1px solid var(--line);
+    font-size: 16.5px; font-weight: 600; line-height: 1.3;
+  }
+  .howto li:last-child { border-bottom: 0; }
+  .howto .n {
+    flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--primary-soft); color: var(--primary);
+    display: grid; place-items: center; font-size: 15px; font-weight: 800;
+  }
+
+  /* status trail */
+  .trail { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .trail li { display: flex; gap: 14px; padding-bottom: 22px; position: relative; }
+  .trail li:last-child { padding-bottom: 0; }
+  .trail li::before {
+    content: ""; position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px;
+    background: var(--line);
+  }
+  .trail li:last-child::before { display: none; }
+  .trail li.ok::before { background: var(--primary); }
+  .trail .mk {
+    flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--line); background: var(--surface);
+    display: grid; place-items: center; color: var(--ink-3); z-index: 1;
+  }
+  .trail li.ok .mk { border-color: var(--primary); background: var(--primary); color: var(--primary-ink); }
+  .trail .what { font-size: 17px; font-weight: 700; line-height: 1.25; }
+  .trail .when { font-size: 13.5px; color: var(--ink-3); margin-top: 4px; line-height: 1.4; }
+  .trail li:not(.ok) .what { color: var(--ink-3); }
+
+  .ghost {
+    background: none; border: 0; cursor: pointer;
+    font-family: inherit; font-size: 15.5px; font-weight: 700;
+    color: var(--primary); padding: 12px 4px; text-align: left;
+    min-height: 48px;
+  }
+  .demo {
+    font-size: 11px; font-weight: 600; color: var(--ink-3);
+    letter-spacing: .04em; text-transform: uppercase;
+    margin-left: auto; flex: 0 0 auto;
+  }
+
+  button:focus-visible, .choice:focus-visible {
+    outline: 3px solid var(--primary); outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="page">
+  <div class="phone">
+    <div class="bar">
+      <button class="back" id="back" hidden aria-label="Back">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <div class="bar-title" id="barTitle">WasteWise Connect<small>Block 6, Desa Mentari</small></div>
+      <span class="demo">Example</span>
+    </div>
+
+    <!-- HOME -->
+    <div class="screen" id="s-home">
+      <div class="here">
+        <svg class="pin" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 10-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+        <div>
+          <div class="lbl">You are here</div>
+          <div class="val">Main Bin Area</div>
+          <div class="sub">Block 6 &middot; Point TP&#8209;01</div>
+        </div>
+      </div>
+
+      <button class="big" data-go="photo">
+        <svg class="ico" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h3.1l1.4-2.2h9L18 8.5H21v11H3z"/><circle cx="12" cy="14" r="3.4"/></svg>
+        Report Rubbish
+        <small>Just take a photo</small>
+      </button>
+
+      <button class="big quiet" data-go="schedule">
+        <svg class="ico" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.2" y="5" width="17.6" height="16" rx="2.6"/><path d="M3.2 10h17.6M8 3v4M16 3v4"/></svg>
+        Collection Times
+      </button>
+
+      <button class="ghost" data-go="status">Check your report &rarr;</button>
+    </div>
+
+    <!-- STEP 1: PHOTO -->
+    <div class="screen" id="s-photo" hidden>
+      <div class="steps">
+        <span>Step 1 of 2</span>
+        <div class="dots" aria-hidden="true"><i class="on"></i><i></i></div>
+      </div>
+      <h2 class="ask">Take a photo of the rubbish</h2>
+
+      <button class="shoot" id="shoot">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h3.1l1.4-2.2h9L18 8.5H21v11H3z"/><circle cx="12" cy="14" r="3.4"/></svg>
+        Tap here
+      </button>
+
+      <div class="here">
+        <svg class="pin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 10-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+        <div>
+          <div class="lbl">Location already filled in</div>
+          <div class="val" style="font-size:15.5px">Main Bin Area, Block 6</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: WHAT -->
+    <div class="screen" id="s-kind" hidden>
+      <div class="steps">
+        <span>Step 2 of 2</span>
+        <div class="dots" aria-hidden="true"><i class="on"></i><i class="on"></i></div>
+      </div>
+
+      <div class="shot" data-stamp="Main Bin Area &middot; 8:42 AM">
+        <button class="retake" id="retake">Retake</button>
+      </div>
+
+      <h2 class="ask">What is the problem?</h2>
+
+      <div class="choices" role="group" aria-label="What is the problem">
+        <button class="choice" data-kind="Bin is full" aria-pressed="false">
+          <svg class="ico" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 9h13l-1 11.5h-11z"/><path d="M4 7.2h16"/><path d="M9.6 4.6h4.8M8.2 6.4l1.6-2M15.8 6.4l-1.6-2"/><path d="M9 2.6l.5 1.4M15 2.6l-.5 1.4M12 1.8v1.6"/></svg>
+          <span>Bin is full</span>
+          <svg class="tick" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>
+        </button>
+
+        <button class="choice" data-kind="Rubbish on the ground" aria-pressed="false">
+          <svg class="ico" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M6.4 20l1.2-4.4 4.6-1 3.6 2.2.8 3.2"/><circle cx="17.4" cy="10.6" r="2.1"/><circle cx="6.6" cy="11.4" r="1.7"/><path d="M11.6 7.4l2.6 1.2-1.4 2.4-2.6-1.2z"/></svg>
+          <span>Rubbish on the ground</span>
+          <svg class="tick" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>
+        </button>
+
+        <button class="choice" data-kind="Bulky waste" aria-pressed="false">
+          <svg class="ico" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.4 19.4V12a2 2 0 012-2h13.2a2 2 0 012 2v7.4"/><path d="M5.6 10V7a2 2 0 012-2h8.8a2 2 0 012 2v3"/><path d="M3.4 15.4h17.2M8.6 19.4v1.8M15.4 19.4v1.8"/></svg>
+          <span>Bulky waste<small>Furniture, mattress, boxes</small></span>
+          <svg class="tick" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>
+        </button>
+      </div>
+
+      <button class="send" id="send" disabled>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.6L20 4l-7.6 16-1.8-6.6z"/></svg>
+        Send
+      </button>
+    </div>
+
+    <!-- DONE -->
+    <div class="screen" id="s-done" hidden>
+      <div class="done">
+        <div class="seal">
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>
+        </div>
+        <h2>Thank you!</h2>
+        <div class="no">Report no. 148 &middot; sent 8:43 AM</div>
+        <p>Block&nbsp;6 management will check it within <b style="color:var(--ink)">2 days</b>.<br>You can see the status any time.</p>
+      </div>
+      <button class="send" data-go="status" style="margin-top:auto">See status</button>
+      <button class="ghost" data-go="home" style="text-align:center">Done &middot; back to start</button>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="screen" id="s-schedule" hidden>
+      <div class="slab">
+        <div class="lbl">Daily collection</div>
+        <div class="huge">7:00 AM</div>
+        <div class="sub">Every day, including weekends.</div>
+      </div>
+      <div class="slab">
+        <div class="lbl">Bulky waste</div>
+        <div class="huge">Saturday</div>
+        <div class="sub">Furniture and mattresses &mdash; leave them beside the bin before 7:00 AM Saturday.</div>
+      </div>
+      <div class="notice">
+        <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.2L21 19.4H3z"/><path d="M12 9.6v4M12 16.2v.2"/></svg>
+        <div>18 Nov: truck breakdown, collection delayed to 11:00 AM.<small>Posted by Block 6 management &middot; 9 Nov</small></div>
+      </div>
+      <h2 class="ask" style="font-size:20px;margin-top:4px">How to throw rubbish</h2>
+      <ul class="howto">
+        <li><span class="n">1</span><span>Tie the bag closed</span></li>
+        <li><span class="n">2</span><span>Put it inside the bin, not beside it</span></li>
+        <li><span class="n">3</span><span>Never throw it from a window or stairwell</span></li>
+      </ul>
+    </div>
+
+    <!-- STATUS -->
+    <div class="screen" id="s-status" hidden>
+      <div class="slab" style="background:var(--surface)">
+        <div class="lbl">Your report</div>
+        <div class="huge" style="font-size:23px">No. 148 &middot; Bin is full</div>
+        <div class="sub">Main Bin Area, Block 6 &middot; 10 Nov, 8:43 AM</div>
+      </div>
+      <ul class="trail">
+        <li class="ok">
+          <span class="mk"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg></span>
+          <div><div class="what">Sent</div><div class="when">10 Nov, 8:43 AM</div></div>
+        </li>
+        <li class="ok">
+          <span class="mk"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg></span>
+          <div><div class="what">Management received it</div><div class="when">10 Nov, 9:10 AM &middot; given to Pak Rahim</div></div>
+        </li>
+        <li>
+          <span class="mk"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.4"/></svg></span>
+          <div><div class="what">Cleared</div><div class="when">Not yet &mdash; expected 12 Nov</div></div>
+        </li>
+      </ul>
+      <button class="ghost" data-go="home" style="margin-top:auto">&larr; Back to start</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var screens = {
+      home: document.getElementById('s-home'),
+      photo: document.getElementById('s-photo'),
+      kind: document.getElementById('s-kind'),
+      done: document.getElementById('s-done'),
+      schedule: document.getElementById('s-schedule'),
+      status: document.getElementById('s-status')
+    };
+    var titles = {
+      home: ['WasteWise Connect', 'Block 6, Desa Mentari'],
+      photo: ['Report Rubbish', 'Main Bin Area'],
+      kind: ['Report Rubbish', 'Main Bin Area'],
+      done: ['Report Sent', 'Block 6, Desa Mentari'],
+      schedule: ['Collection Times', 'Block 6, Desa Mentari'],
+      status: ['Your Report', 'Block 6, Desa Mentari']
+    };
+    var backTo = { photo: 'home', kind: 'photo', schedule: 'home', status: 'home', done: null };
+
+    var backBtn = document.getElementById('back');
+    var barTitle = document.getElementById('barTitle');
+    var current = 'home';
+
+    function show(name) {
+      Object.keys(screens).forEach(function (k) { screens[k].hidden = (k !== name); });
+      current = name;
+      var t = titles[name];
+      barTitle.textContent = t[0];
+      var s = document.createElement('small');
+      s.textContent = t[1];
+      barTitle.appendChild(s);
+      backBtn.hidden = !backTo[name];
+      screens[name].scrollTop = 0;
+    }
+
+    document.addEventListener('click', function (e) {
+      var go = e.target.closest('[data-go]');
+      if (go) { show(go.getAttribute('data-go')); }
+    });
+
+    backBtn.addEventListener('click', function () {
+      var t = backTo[current];
+      if (t) show(t);
+    });
+
+    document.getElementById('shoot').addEventListener('click', function () { show('kind'); });
+    document.getElementById('retake').addEventListener('click', function () { show('photo'); });
+
+    var sendBtn = document.getElementById('send');
+    var choices = Array.prototype.slice.call(document.querySelectorAll('.choice'));
+    choices.forEach(function (c) {
+      c.addEventListener('click', function () {
+        choices.forEach(function (o) { o.setAttribute('aria-pressed', String(o === c)); });
+        sendBtn.disabled = false;
+      });
+    });
+
+    sendBtn.addEventListener('click', function () {
+      if (sendBtn.disabled) return;
+      show('done');
+      choices.forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
+      sendBtn.disabled = true;
+    });
+
+    show('home');
+  })();
+</script>
+
+</body></html>
