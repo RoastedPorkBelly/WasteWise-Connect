@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>WasteWise Connect</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
@@ -151,8 +150,10 @@
   .big:active { transform: translateY(1px); }
   .big.quiet {
     background: var(--sunken); color: var(--ink); border-color: var(--line);
+    font-size: 19px;
   }
   .big.quiet .ico { color: var(--primary); }
+  .big.quiet small { opacity: 1; color: var(--ink-3); }
 
   /* ---------- steps ---------- */
   .steps { display: flex; align-items: center; gap: 8px; }
@@ -165,6 +166,7 @@
     font-size: 25px; font-weight: 800; letter-spacing: -.02em;
     line-height: 1.2; margin: 0; text-wrap: balance;
   }
+  .hint { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-3); }
 
   /* camera target */
   .shoot {
@@ -178,6 +180,12 @@
     cursor: pointer;
   }
   .shoot:active { background: var(--primary-line); }
+  .pframe {
+    width: 78%; aspect-ratio: 3 / 1;
+    border: 2px dashed currentColor; border-radius: 8px;
+    display: grid; place-items: center;
+  }
+  .plabel { font-size: 15px; font-weight: 700; }
 
   .shot {
     width: 100%; aspect-ratio: 4 / 3; max-width: 100%;
@@ -205,6 +213,65 @@
     background: rgba(255,255,255,.93); color: #131F19;
   }
 
+  /* simulated photo of a car rear */
+  .carshot {
+    width: 100%; aspect-ratio: 4 / 3; max-width: 100%;
+    border-radius: 18px; overflow: hidden;
+    border: 1px solid var(--line);
+    position: relative;
+    display: grid; place-items: center;
+    background:
+      radial-gradient(70% 50% at 50% 22%, #5E6A74 0%, rgba(94,106,116,0) 70%),
+      linear-gradient(172deg, #8E99A2 0%, #6C777F 52%, #424B52 100%);
+  }
+  .carshot .pp {
+    background: #14181B; color: #F3F5F4;
+    font-size: clamp(19px, 7.4vw, 30px); font-weight: 800; letter-spacing: .1em;
+    padding: 9px 16px; border-radius: 5px;
+    border: 2px solid #D8DCDA;
+    transform: perspective(380px) rotateY(-9deg);
+    font-variant-numeric: tabular-nums;
+  }
+  .carshot::after {
+    content: attr(data-stamp);
+    position: absolute; left: 10px; bottom: 9px;
+    font-size: 11px; font-weight: 600;
+    color: #fff; background: rgba(12,20,16,.6);
+    padding: 4px 8px; border-radius: 7px;
+  }
+
+  /* reading / result */
+  .reading {
+    display: flex; align-items: center; gap: 13px;
+    border: 1px solid var(--line); border-radius: 16px;
+    background: var(--sunken); padding: 16px;
+    font-size: 16.5px; font-weight: 700; color: var(--ink-2);
+  }
+  .spin {
+    flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%;
+    border: 3px solid var(--line); border-top-color: var(--primary);
+    animation: turn .9s linear infinite;
+  }
+  @keyframes turn { to { transform: rotate(360deg); } }
+
+  .result {
+    border: 1px solid var(--primary-line); background: var(--primary-soft);
+    border-radius: 16px; padding: 16px;
+  }
+  .result .lbl { font-size: 11.5px; font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: .07em; }
+  .plateout {
+    font-size: 34px; font-weight: 800; letter-spacing: .07em;
+    margin-top: 6px; font-variant-numeric: tabular-nums; line-height: 1.1;
+  }
+  .conf { font-size: 13.5px; color: var(--ink-2); margin-top: 6px; }
+  .caution {
+    display: flex; gap: 10px; align-items: flex-start;
+    border: 1px solid var(--warn-line); background: var(--warn-soft); color: var(--warn-ink);
+    border-radius: 14px; padding: 13px 14px; margin-top: 14px;
+    font-size: 13.5px; font-weight: 600; line-height: 1.45;
+  }
+  .caution .ico { flex: 0 0 auto; margin-top: 1px; }
+
   /* three picture choices */
   .choices { display: grid; gap: 10px; }
   .choice {
@@ -217,9 +284,7 @@
   }
   .choice small { display: block; font-size: 12.5px; font-weight: 400; color: var(--ink-3); margin-top: 3px; }
   .choice .ico { flex: 0 0 auto; color: var(--ink-2); }
-  .choice[aria-pressed="true"] {
-    border-color: var(--primary); background: var(--primary-soft);
-  }
+  .choice[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
   .choice[aria-pressed="true"] .ico { color: var(--primary); }
   .choice .tick { margin-left: auto; color: var(--primary); display: none; flex: 0 0 auto; }
   .choice[aria-pressed="true"] .tick { display: block; }
@@ -234,31 +299,28 @@
   .send[disabled] { background: var(--line); color: var(--ink-3); cursor: default; }
 
   /* done */
-  .done { text-align: center; padding-top: 18px; }
+  .done { text-align: center; padding-top: 14px; }
   .seal {
-    width: 96px; height: 96px; margin: 0 auto 18px;
+    width: 88px; height: 88px; margin: 0 auto 16px;
     border-radius: 50%;
     background: var(--primary); color: var(--primary-ink);
     display: grid; place-items: center;
   }
-  .done h2 { font-size: 28px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px; }
-  .done .no {
-    font-size: 15px; font-weight: 700; color: var(--ink-2);
-    font-variant-numeric: tabular-nums;
-  }
-  .done p { font-size: 16px; color: var(--ink-2); line-height: 1.55; margin: 14px 0 0; }
+  .done h2 { font-size: 27px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px; }
+  .done .no { font-size: 15px; font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .done p { font-size: 15.5px; color: var(--ink-2); line-height: 1.55; margin: 12px 0 0; }
+
+  .rowbtns { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 
   /* schedule */
-  .slab {
-    border: 1px solid var(--line); border-radius: 16px;
-    background: var(--sunken); padding: 16px;
-  }
+  .slab { border: 1px solid var(--line); border-radius: 16px; background: var(--sunken); padding: 16px; }
   .slab .lbl { font-size: 11.5px; font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: .07em; }
   .slab .huge {
     font-size: 33px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-top: 5px;
     font-variant-numeric: tabular-nums;
   }
   .slab .sub { font-size: 14.5px; color: var(--ink-2); margin-top: 6px; line-height: 1.45; }
+  .slab .sub b { color: var(--ink); }
   .notice {
     border: 1px solid var(--warn-line); background: var(--warn-soft); color: var(--warn-ink);
     border-radius: 16px; padding: 14px 15px;
@@ -287,8 +349,7 @@
   .trail li { display: flex; gap: 14px; padding-bottom: 22px; position: relative; }
   .trail li:last-child { padding-bottom: 0; }
   .trail li::before {
-    content: ""; position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px;
-    background: var(--line);
+    content: ""; position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px; background: var(--line);
   }
   .trail li:last-child::before { display: none; }
   .trail li.ok::before { background: var(--primary); }
@@ -314,11 +375,10 @@
     margin-left: auto; flex: 0 0 auto;
   }
 
-  button:focus-visible, .choice:focus-visible {
-    outline: 3px solid var(--primary); outline-offset: 2px;
-  }
+  button:focus-visible, .choice:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; animation: none !important; }
+    * { transition: none !important; }
+    .spin { animation: none !important; border-top-color: var(--primary); }
   }
 </style>
 
@@ -345,13 +405,12 @@
 
       <button class="big" data-go="photo">
         <svg class="ico" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h3.1l1.4-2.2h9L18 8.5H21v11H3z"/><circle cx="12" cy="14" r="3.4"/></svg>
-        Report Rubbish
-        <small>Just take a photo</small>
+        <span>Report Rubbish<small>Just take a photo</small></span>
       </button>
 
       <button class="big quiet" data-go="schedule">
         <svg class="ico" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.2" y="5" width="17.6" height="16" rx="2.6"/><path d="M3.2 10h17.6M8 3v4M16 3v4"/></svg>
-        Collection Times
+        <span>Collection Times</span>
       </button>
 
       <button class="ghost" data-go="status">Check your report &rarr;</button>
@@ -422,14 +481,62 @@
     <div class="screen" id="s-done" hidden>
       <div class="done">
         <div class="seal">
-          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>
         </div>
         <h2>Thank you!</h2>
         <div class="no">Report no. 148 &middot; sent 8:43 AM</div>
-        <p>Block&nbsp;6 management will check it within <b style="color:var(--ink)">2 days</b>.<br>You can see the status any time.</p>
+        <p>Block&nbsp;6 management will check it within <b style="color:var(--ink)">2 days</b>.</p>
       </div>
-      <button class="send" data-go="status" style="margin-top:auto">See status</button>
-      <button class="ghost" data-go="home" style="text-align:center">Done &middot; back to start</button>
+
+      <button class="big quiet" data-go="vehicle">
+        <svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 16.4v-3.1l1.8-4.5A2 2 0 016.7 7.5h10.6a2 2 0 011.9 1.3l1.8 4.5v3.1"/><path d="M3 16.4h18"/><circle cx="7.2" cy="16.8" r="1.9"/><circle cx="16.8" cy="16.8" r="1.9"/><path d="M4.9 13h14.2"/></svg>
+        <span>Did you see the vehicle?<small>Optional &mdash; helps catch repeat dumpers</small></span>
+      </button>
+
+      <div class="rowbtns">
+        <button class="ghost" data-go="status">See status</button>
+        <button class="ghost" data-go="home">Done</button>
+      </div>
+    </div>
+
+    <!-- VEHICLE: AIM -->
+    <div class="screen" id="s-vehicle" hidden>
+      <h2 class="ask">Point at the number plate</h2>
+
+      <button class="shoot" id="shootPlate">
+        <span class="pframe">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h3.1l1.4-2.2h9L18 8.5H21v11H3z"/><circle cx="12" cy="14" r="3.4"/></svg>
+        </span>
+        <span class="plabel">Tap here</span>
+      </button>
+
+      <p class="hint">Get close enough that the letters fill the box. The photo stays on your phone &mdash; only the plate number is sent with your report.</p>
+
+      <button class="ghost" data-go="done" style="margin-top:auto">Skip &mdash; I did not see a vehicle</button>
+    </div>
+
+    <!-- VEHICLE: READ -->
+    <div class="screen" id="s-plate" hidden>
+      <div class="carshot" data-stamp="Main Bin Area &middot; 8:44 AM"><span class="pp">WXY 1234</span></div>
+
+      <div class="reading" id="reading" role="status">
+        <span class="spin" aria-hidden="true"></span>
+        Reading the plate&hellip;
+      </div>
+
+      <div class="result" id="result" hidden>
+        <div class="lbl">Plate read</div>
+        <div class="plateout" id="plateOut">WXY 1234</div>
+        <div class="conf" id="conf">87% confidence</div>
+      </div>
+
+      <div class="caution" id="caution" hidden>
+        <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.2L21 19.4H3z"/><path d="M12 9.6v4M12 16.2v.2"/></svg>
+        <div id="cautionText">Management checks this against your photo before acting on it.</div>
+      </div>
+
+      <button class="send" id="attach" disabled>Add to report</button>
+      <button class="ghost" id="retakePlate" style="text-align:center">Retake photo</button>
     </div>
 
     <!-- SCHEDULE -->
@@ -462,6 +569,7 @@
         <div class="lbl">Your report</div>
         <div class="huge" style="font-size:23px">No. 148 &middot; Bin is full</div>
         <div class="sub">Main Bin Area, Block 6 &middot; 10 Nov, 8:43 AM</div>
+        <div class="sub" id="statusVehicle" hidden>Vehicle: <b id="statusPlate">WXY 1234</b> &mdash; read from your photo, not yet verified</div>
       </div>
       <ul class="trail">
         <li class="ok">
@@ -484,11 +592,37 @@
 
 <script>
   (function () {
+    /* ----------------------------------------------------------------
+       PLATE RECOGNITION
+
+       readPlate(source) is the one function that differs between this
+       prototype and the real build.
+
+       Real build (GitHub Pages, no sandbox) -- see plate-ocr.js:
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js"><\/script>
+         const r = await readPlate(videoOrImageElement);
+
+       Here, Tesseract's runtime downloads (worker, WASM core,
+       eng.traineddata) are blocked by the artifact sandbox, so this
+       returns a scripted result after a realistic delay instead.
+    ---------------------------------------------------------------- */
+    function readPlate() {
+      return new Promise(function (resolve) {
+        setTimeout(function () {
+          resolve({ ok: true, plate: 'WXY 1234', confidence: 87 });
+        }, 1600);
+      });
+    }
+
+    var MIN_CONFIDENCE = 60;
+
     var screens = {
       home: document.getElementById('s-home'),
       photo: document.getElementById('s-photo'),
       kind: document.getElementById('s-kind'),
       done: document.getElementById('s-done'),
+      vehicle: document.getElementById('s-vehicle'),
+      plate: document.getElementById('s-plate'),
       schedule: document.getElementById('s-schedule'),
       status: document.getElementById('s-status')
     };
@@ -497,10 +631,16 @@
       photo: ['Report Rubbish', 'Main Bin Area'],
       kind: ['Report Rubbish', 'Main Bin Area'],
       done: ['Report Sent', 'Block 6, Desa Mentari'],
+      vehicle: ['Vehicle Plate', 'Optional'],
+      plate: ['Vehicle Plate', 'Optional'],
       schedule: ['Collection Times', 'Block 6, Desa Mentari'],
       status: ['Your Report', 'Block 6, Desa Mentari']
     };
-    var backTo = { photo: 'home', kind: 'photo', schedule: 'home', status: 'home', done: null };
+    var backTo = {
+      photo: 'home', kind: 'photo', done: null,
+      vehicle: 'done', plate: 'vehicle',
+      schedule: 'home', status: 'home'
+    };
 
     var backBtn = document.getElementById('back');
     var barTitle = document.getElementById('barTitle');
@@ -516,6 +656,7 @@
       barTitle.appendChild(s);
       backBtn.hidden = !backTo[name];
       screens[name].scrollTop = 0;
+      if (name === 'plate') startRead();
     }
 
     document.addEventListener('click', function (e) {
@@ -531,6 +672,7 @@
     document.getElementById('shoot').addEventListener('click', function () { show('kind'); });
     document.getElementById('retake').addEventListener('click', function () { show('photo'); });
 
+    /* step 2: problem type */
     var sendBtn = document.getElementById('send');
     var choices = Array.prototype.slice.call(document.querySelectorAll('.choice'));
     choices.forEach(function (c) {
@@ -539,7 +681,6 @@
         sendBtn.disabled = false;
       });
     });
-
     sendBtn.addEventListener('click', function () {
       if (sendBtn.disabled) return;
       show('done');
@@ -547,8 +688,56 @@
       sendBtn.disabled = true;
     });
 
+    /* optional: plate */
+    var reading = document.getElementById('reading');
+    var result = document.getElementById('result');
+    var caution = document.getElementById('caution');
+    var cautionText = document.getElementById('cautionText');
+    var plateOut = document.getElementById('plateOut');
+    var confEl = document.getElementById('conf');
+    var attach = document.getElementById('attach');
+    var found = null;
+
+    document.getElementById('shootPlate').addEventListener('click', function () { show('plate'); });
+    document.getElementById('retakePlate').addEventListener('click', function () { show('vehicle'); });
+
+    function startRead() {
+      found = null;
+      reading.hidden = false;
+      result.hidden = true;
+      caution.hidden = true;
+      attach.disabled = true;
+      attach.textContent = 'Add to report';
+
+      readPlate().then(function (r) {
+        reading.hidden = true;
+        caution.hidden = false;
+        if (r.ok && r.confidence >= MIN_CONFIDENCE) {
+          found = r;
+          plateOut.textContent = r.plate;
+          confEl.textContent = r.confidence + '% confidence';
+          result.hidden = false;
+          cautionText.textContent = 'Management checks this against your photo before acting on it.';
+          attach.disabled = false;
+        } else {
+          cautionText.textContent = 'The plate was not clear enough to read. Your photo still goes to management, who can read it themselves.';
+          attach.disabled = false;
+          attach.textContent = 'Send photo anyway';
+        }
+      });
+    }
+
+    var statusVehicle = document.getElementById('statusVehicle');
+    var statusPlate = document.getElementById('statusPlate');
+    attach.addEventListener('click', function () {
+      if (attach.disabled) return;
+      if (found) {
+        statusPlate.textContent = found.plate;
+        statusVehicle.hidden = false;
+      }
+      show('status');
+    });
+
     show('home');
   })();
 </script>
-
-</body></html>

@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16684A">
+<title>WasteWise Connect — Block 6</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
+
+<style>
+  :root {
+    --bg: #EDF1EC;
+    --surface: #FFFFFF;
+    --sunken: #F4F7F3;
+    --ink: #131F19;
+    --ink-2: #516057;
+    --ink-3: #7C8B82;
+    --line: #D4DBD4;
+    --primary: #16684A;
+    --primary-ink: #FFFFFF;
+    --primary-soft: #DAEBE1;
+    --primary-line: #A9CDB8;
+    --warn-soft: #FBF0D8;
+    --warn-ink: #78541A;
+    --warn-line: #E3CE9F;
+    --bad-soft: #FBE3DF;
+    --bad-ink: #8C2A1C;
+    --bad-line: #E7B8AF;
+    --font-ui: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0D1411;
+      --surface: #19221E;
+      --sunken: #141C19;
+      --ink: #E9F0EB;
+      --ink-2: #A3B2A9;
+      --ink-3: #7F8E85;
+      --line: #2B3832;
+      --primary: #4FB98A;
+      --primary-ink: #04150D;
+      --primary-soft: #16302A;
+      --primary-line: #2C5847;
+      --warn-soft: #2B2412;
+      --warn-ink: #E6C382;
+      --warn-line: #4A3D1D;
+      --bad-soft: #2E1613;
+      --bad-ink: #F0A496;
+      --bad-line: #52251D;
+      color-scheme: dark;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+
+  /* The app fills the phone. No device frame here — this is the real thing. */
+  .app {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .bar {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 14px;
+    padding-top: calc(13px + env(safe-area-inset-top, 0px));
+    padding-left: max(14px, env(safe-area-inset-left, 0px));
+    padding-right: max(14px, env(safe-area-inset-right, 0px));
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .bar-title { font-size: 16px; font-weight: 800; letter-spacing: -.01em; min-width: 0; }
+  .bar-title small { display: block; font-size: 11px; font-weight: 400; color: var(--ink-3); }
+  .back {
+    flex: 0 0 auto; width: 44px; height: 44px;
+    display: grid; place-items: center;
+    border: 1px solid var(--line); border-radius: 14px;
+    background: var(--sunken); color: var(--ink); cursor: pointer;
+  }
+
+  .screen {
+    flex: 1 1 auto; min-height: 0;
+    overflow-y: auto;
+    padding: 18px 16px 22px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .here {
+    background: var(--primary-soft); border: 1px solid var(--primary-line);
+    border-radius: 16px; padding: 14px 15px;
+    display: flex; gap: 12px; align-items: center;
+  }
+  .here .pin { flex: 0 0 auto; color: var(--primary); }
+  .here .lbl { font-size: 11.5px; font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: .07em; }
+  .here .val { font-size: 18px; font-weight: 800; line-height: 1.2; margin-top: 2px; }
+  .here .sub { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; }
+
+  .big {
+    width: 100%; min-height: 92px;
+    display: flex; align-items: center; gap: 15px;
+    padding: 18px; border-radius: 18px; border: 1px solid transparent;
+    font-family: inherit; font-size: 22px; font-weight: 800; letter-spacing: -.01em;
+    text-align: left; cursor: pointer; line-height: 1.15;
+    background: var(--primary); color: var(--primary-ink);
+  }
+  .big small { display: block; font-size: 13px; font-weight: 400; opacity: .82; margin-top: 3px; }
+  .big .ico { flex: 0 0 auto; }
+  .big:active { transform: translateY(1px); }
+  .big.quiet { background: var(--sunken); color: var(--ink); border-color: var(--line); font-size: 19px; }
+  .big.quiet .ico { color: var(--primary); }
+  .big.quiet small { opacity: 1; color: var(--ink-3); }
+
+  .steps { display: flex; align-items: center; gap: 8px; }
+  .steps span { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .dots { display: flex; gap: 5px; margin-left: auto; }
+  .dots i { width: 22px; height: 6px; border-radius: 3px; background: var(--line); display: block; }
+  .dots i.on { background: var(--primary); }
+
+  .ask { font-size: 25px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; margin: 0; text-wrap: balance; }
+  .hint { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-3); }
+
+  .shoot {
+    width: 100%; aspect-ratio: 4 / 3; max-width: 100%;
+    border-radius: 18px; border: 2px dashed var(--primary-line);
+    background: var(--primary-soft); color: var(--primary);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    font-family: inherit; font-size: 20px; font-weight: 800; cursor: pointer;
+  }
+  .shoot:active { background: var(--primary-line); }
+  .pframe { width: 78%; aspect-ratio: 3 / 1; border: 2px dashed currentColor; border-radius: 8px; display: grid; place-items: center; }
+  .plabel { font-size: 15px; font-weight: 700; }
+
+  .shot {
+    width: 100%; aspect-ratio: 4 / 3; max-width: 100%;
+    border-radius: 18px; overflow: hidden; border: 1px solid var(--line);
+    position: relative; background: var(--sunken);
+  }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot .stamp {
+    position: absolute; left: 10px; bottom: 9px;
+    font-size: 11px; font-weight: 600; color: #fff;
+    background: rgba(12,20,16,.62); padding: 4px 8px; border-radius: 7px;
+  }
+  .shot .retake {
+    position: absolute; top: 9px; right: 9px;
+    border: 0; border-radius: 10px; cursor: pointer;
+    font-family: inherit; font-size: 13px; font-weight: 700; padding: 9px 12px;
+    background: rgba(255,255,255,.93); color: #131F19;
+  }
+
+  .choices { display: grid; gap: 10px; }
+  .choice {
+    display: flex; align-items: center; gap: 14px;
+    width: 100%; min-height: 76px; padding: 14px 15px;
+    border: 2px solid var(--line); border-radius: 16px;
+    background: var(--surface); color: var(--ink);
+    font-family: inherit; font-size: 18px; font-weight: 700;
+    text-align: left; cursor: pointer; line-height: 1.2;
+  }
+  .choice small { display: block; font-size: 12.5px; font-weight: 400; color: var(--ink-3); margin-top: 3px; }
+  .choice .ico { flex: 0 0 auto; color: var(--ink-2); }
+  .choice[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
+  .choice[aria-pressed="true"] .ico { color: var(--primary); }
+  .choice .tick { margin-left: auto; color: var(--primary); display: none; flex: 0 0 auto; }
+  .choice[aria-pressed="true"] .tick { display: block; }
+
+  .send {
+    width: 100%; min-height: 68px; margin-top: auto;
+    border: 0; border-radius: 18px; cursor: pointer;
+    background: var(--primary); color: var(--primary-ink);
+    font-family: inherit; font-size: 23px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  .send[disabled] { background: var(--line); color: var(--ink-3); cursor: default; }
+
+  .done { text-align: center; padding-top: 14px; }
+  .seal {
+    width: 88px; height: 88px; margin: 0 auto 16px; border-radius: 50%;
+    background: var(--primary); color: var(--primary-ink);
+    display: grid; place-items: center;
+  }
+  .done h2 { font-size: 27px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 8px; }
+  .done .no { font-size: 15px; font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .done p { font-size: 15.5px; color: var(--ink-2); line-height: 1.55; margin: 12px 0 0; }
+  .rowbtns { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+  .reading {
+    display: flex; align-items: center; gap: 13px;
+    border: 1px solid var(--line); border-radius: 16px;
+    background: var(--sunken); padding: 16px;
+    font-size: 16.5px; font-weight: 700; color: var(--ink-2);
+  }
+  .spin {
+    flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%;
+    border: 3px solid var(--line); border-top-color: var(--primary);
+    animation: turn .9s linear infinite;
+  }
+  .send .spin { border-color: rgba(255,255,255,.35); border-top-color: #fff; width: 22px; height: 22px; }
+  @keyframes turn { to { transform: rotate(360deg); } }
+
+  .result { border: 1px solid var(--primary-line); background: var(--primary-soft); border-radius: 16px; padding: 16px; }
+  .result .lbl { font-size: 11.5px; font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: .07em; }
+  .plateout { font-size: 34px; font-weight: 800; letter-spacing: .07em; margin-top: 6px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .conf { font-size: 13.5px; color: var(--ink-2); margin-top: 6px; }
+
+  .caution, .err {
+    display: flex; gap: 10px; align-items: flex-start;
+    border-radius: 14px; padding: 13px 14px;
+    font-size: 14px; font-weight: 600; line-height: 1.45;
+  }
+  .caution { border: 1px solid var(--warn-line); background: var(--warn-soft); color: var(--warn-ink); }
+  .err { border: 1px solid var(--bad-line); background: var(--bad-soft); color: var(--bad-ink); }
+  .caution .ico, .err .ico { flex: 0 0 auto; margin-top: 1px; }
+
+  .slab { border: 1px solid var(--line); border-radius: 16px; background: var(--sunken); padding: 16px; }
+  .slab .lbl { font-size: 11.5px; font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: .07em; }
+  .slab .huge { font-size: 33px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-top: 5px; font-variant-numeric: tabular-nums; }
+  .slab .sub { font-size: 14.5px; color: var(--ink-2); margin-top: 6px; line-height: 1.45; }
+  .slab .sub b { color: var(--ink); }
+  .notice {
+    border: 1px solid var(--warn-line); background: var(--warn-soft); color: var(--warn-ink);
+    border-radius: 16px; padding: 14px 15px;
+    display: flex; gap: 12px; align-items: flex-start;
+    font-size: 15px; font-weight: 600; line-height: 1.45;
+  }
+  .notice .ico { flex: 0 0 auto; margin-top: 1px; }
+  .notice small { display: block; font-weight: 400; opacity: .85; margin-top: 3px; font-size: 12.5px; }
+
+  ul.howto { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .howto li {
+    display: flex; gap: 13px; align-items: center;
+    padding: 14px 4px; border-bottom: 1px solid var(--line);
+    font-size: 16.5px; font-weight: 600; line-height: 1.3;
+  }
+  .howto li:last-child { border-bottom: 0; }
+  .howto .n {
+    flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--primary-soft); color: var(--primary);
+    display: grid; place-items: center; font-size: 15px; font-weight: 800;
+  }
+
+  .trail { list-style: none; margin: 0; padding: 0; }
+  .trail li { display: flex; gap: 14px; padding-bottom: 22px; position: relative; }
+  .trail li:last-child { padding-bottom: 0; }
+  .trail li::before { content: ""; position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px; background: var(--line); }
+  .trail li:last-child::before { display: none; }
+  .trail li.ok::before { background: var(--primary); }
+  .trail .mk {
+    flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--line); background: var(--surface);
+    display: grid; place-items: center; color: var(--ink-3); z-index: 1;
+  }
+  .trail li.ok .mk { border-color: var(--primary); background: var(--primary); color: var(--primary-ink); }
+  .trail .what { font-size: 17px; font-weight: 700; line-height: 1.25; }
+  .trail .when { font-size: 13.5px; color: var(--ink-3); margin-top: 4px; line-height: 1.4; }
+  .trail li:not(.ok) .what { color: var(--ink-3); }
+
+  .ghost {
+    background: none; border: 0; cursor: pointer;
+    font-family: inherit; font-size: 15.5px; font-weight: 700;
+    color: var(--primary); padding: 12px 4px; text-align: left; min-height: 48px;
+  }
+  .setupwarn {
+    background: var(--bad-soft); color: var(--bad-ink);
+    border-bottom: 1px solid var(--bad-line);
+    padding: 11px 16px; font-size: 13px; font-weight: 700; line-height: 1.4;
+  }
+
+  button:focus-visible, .choice:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+    .spin { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="setupwarn" id="setupWarn" hidden>
+  WasteWise.ENDPOINT is not set. Paste your Apps Script web app URL into this
+  page before putting it on site — reports cannot be sent until you do.
+</div>
+
+<div class="app">
+  <div class="bar">
+    <button class="back" id="back" hidden aria-label="Back">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="bar-title" id="barTitle">WasteWise Connect<small>Block 6, Desa Mentari</small></div>
+  </div>
+
+  <!-- hidden camera inputs -->
+  <input type="file" accept="image/*" capture="environment" id="photoInput" hidden>
+  <input type="file" accept="image/*" capture="environment" id="plateInput" hidden>
+
+  <!-- HOME -->
+  <div class="screen" id="s-home">
+    <div class="here">
+      <svg class="pin" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 10-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+      <div>
+        <div class="lbl">You are here</div>
+        <div class="val" id="hotspotName">Block 6</div>
+        <div class="sub" id="hotspotId">Desa Mentari</div>
+      </div>
+    </div>
+
+    <button class="big" id="startReport">
+      <svg class="ico" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h3.1l1.4-2.2h9L18 8.5H21v11H3z"/><circle cx="12" cy="14" r="3.4"/></svg>
+      <span>Report Rubbish<small>Just take a photo</small></span>
+    </button>
+
+    <button class="big quiet" data-go="schedule">
+      <svg class="ico" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.2" y="5" width="17.6" height="16" rx="2.6"/><path d="M3.2 10h17.6M8 3v4M16 3v4"/></svg>
+      <span>Collection Times</span>
+    </button>
+
+    <button class="ghost" data-go="status">Check your report &rarr;</button>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="screen" id="s-photo" hidden>
+    <div class="steps">
+      <span>Step 1 of 2</span>
+      <div class="dots" aria-hidden="true"><i class="on"></i><i></i></div>
+    </div>
+    <h2 class="ask">Take a photo of the rubbish</h2>
+
+    <button class="shoot" id="shoot">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h3.1l1.4-2.2h9L18 8.5H21v11H3z"/><circle cx="12" cy="14" r="3.4"/></svg>
+      Tap here
+    </button>
+
+    <div class="here">
+      <svg class="pin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 10-14 0c0 5.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+      <div>
+        <div class="lbl">Location already filled in</div>
+        <div class="val" style="font-size:15.5px" id="hotspotEcho">Block 6</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="screen" id="s-kind" hidden>
+    <div class="steps">
+      <span>Step 2 of 2</span>
+      <div class="dots" aria-hidden="true"><i class="on"></i><i class="on"></i></div>
+    </div>
+
+    <div class="shot">
+      <img id="shotImg" alt="The rubbish you photographed">
+      <span class="stamp" id="shotStamp"></span>
+      <button class="retake" id="retake">Retake</button>
+    </div>
+
+    <h2 class="ask">What is the problem?</h2>
+
+    <div class="choices" role="group" aria-label="What is the problem">
+      <button class="choice" data-kind="Bin is full" aria-pressed="false">
+        <svg class="ico" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 9h13l-1 11.5h-11z"/><path d="M4 7.2h16"/><path d="M9.6 4.6h4.8M8.2 6.4l1.6-2M15.8 6.4l-1.6-2"/><path d="M9 2.6l.5 1.4M15 2.6l-.5 1.4M12 1.8v1.6"/></svg>
+        <span>Bin is full</span>
+        <svg class="tick" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>
+      </button>
+
+      <button class="choice" data-kind="Rubbish on the ground" aria-pressed="false">
+        <svg class="ico" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M6.4 20l1.2-4.4 4.6-1 3.6 2.2.8 3.2"/><circle cx="17.4" cy="10.6" r="2.1"/><circle cx="6.6" cy="11.4" r="1.7"/><path d="M11.6 7.4l2.6 1.2-1.4 2.4-2.6-1.2z"/></svg>
+        <span>Rubbish on the ground</span>
+        <svg class="tick" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>
+      </button>
+
+      <button class="choice" data-kind="Bulky waste" aria-pressed="false">
+        <svg class="ico" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.4 19.4V12a2 2 0 012-2h13.2a2 2 0 012 2v7.4"/><path d="M5.6 10V7a2 2 0 012-2h8.8a2 2 0 012 2v3"/><path d="M3.4 15.4h17.2M8.6 19.4v1.8M15.4 19.4v1.8"/></svg>
+        <span>Bulky waste<small>Furniture, mattress, boxes</small></span>
+        <svg class="tick" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>
+      </button>
+    </div>
+
+    <div class="err" id="sendErr" hidden>
+      <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.2L21 19.4H3z"/><path d="M12 9.6v4M12 16.2v.2"/></svg>
+      <span id="sendErrText"></span>
+    </div>
+
+    <button class="send" id="send" disabled>
+      <svg id="sendIcon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.6L20 4l-7.6 16-1.8-6.6z"/></svg>
+      <span class="spin" id="sendSpin" hidden aria-hidden="true"></span>
+      <span id="sendLabel">Send</span>
+    </button>
+  </div>
+
+  <!-- DONE -->
+  <div class="screen" id="s-done" hidden>
+    <div class="done">
+      <div class="seal">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>
+      </div>
+      <h2>Thank you!</h2>
+      <div class="no" id="doneNo"></div>
+      <p>Block&nbsp;6 management will check it within <b style="color:var(--ink)">2 days</b>.</p>
+    </div>
+
+    <button class="big quiet" data-go="vehicle">
+      <svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 16.4v-3.1l1.8-4.5A2 2 0 016.7 7.5h10.6a2 2 0 011.9 1.3l1.8 4.5v3.1"/><path d="M3 16.4h18"/><circle cx="7.2" cy="16.8" r="1.9"/><circle cx="16.8" cy="16.8" r="1.9"/><path d="M4.9 13h14.2"/></svg>
+      <span>Did you see the vehicle?<small>Optional &mdash; helps catch repeat dumpers</small></span>
+    </button>
+
+    <div class="rowbtns">
+      <button class="ghost" data-go="status">See status</button>
+      <button class="ghost" data-go="home">Done</button>
+    </div>
+  </div>
+
+  <!-- VEHICLE: AIM -->
+  <div class="screen" id="s-vehicle" hidden>
+    <h2 class="ask">Point at the number plate</h2>
+
+    <button class="shoot" id="shootPlate">
+      <span class="pframe">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5h3.1l1.4-2.2h9L18 8.5H21v11H3z"/><circle cx="12" cy="14" r="3.4"/></svg>
+      </span>
+      <span class="plabel">Tap here</span>
+    </button>
+
+    <p class="hint">Get close enough that the letters fill the box. The photo stays on your phone &mdash; only the plate number is sent with your report.</p>
+
+    <button class="ghost" data-go="done" style="margin-top:auto">Skip &mdash; I did not see a vehicle</button>
+  </div>
+
+  <!-- VEHICLE: READ -->
+  <div class="screen" id="s-plate" hidden>
+    <div class="shot">
+      <img id="plateImg" alt="The number plate you photographed">
+    </div>
+
+    <div class="reading" id="reading" role="status">
+      <span class="spin" aria-hidden="true"></span>
+      <span id="readingText">Reading the plate&hellip;</span>
+    </div>
+
+    <div class="result" id="result" hidden>
+      <div class="lbl">Plate read</div>
+      <div class="plateout" id="plateOut"></div>
+      <div class="conf" id="conf"></div>
+    </div>
+
+    <div class="caution" id="caution" hidden>
+      <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.2L21 19.4H3z"/><path d="M12 9.6v4M12 16.2v.2"/></svg>
+      <span id="cautionText"></span>
+    </div>
+
+    <button class="send" id="attach" disabled>
+      <span class="spin" id="attachSpin" hidden aria-hidden="true"></span>
+      <span id="attachLabel">Add to report</span>
+    </button>
+    <button class="ghost" id="retakePlate" style="text-align:center">Retake photo</button>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="screen" id="s-schedule" hidden>
+    <div class="slab">
+      <div class="lbl">Daily collection</div>
+      <div class="huge">7:00 AM</div>
+      <div class="sub">Every day, including weekends.</div>
+    </div>
+    <div class="slab">
+      <div class="lbl">Bulky waste</div>
+      <div class="huge">Saturday</div>
+      <div class="sub">Furniture and mattresses &mdash; leave them beside the bin before 7:00 AM Saturday.</div>
+    </div>
+    <h2 class="ask" style="font-size:20px;margin-top:4px">How to throw rubbish</h2>
+    <ul class="howto">
+      <li><span class="n">1</span><span>Tie the bag closed</span></li>
+      <li><span class="n">2</span><span>Put it inside the bin, not beside it</span></li>
+      <li><span class="n">3</span><span>Never throw it from a window or stairwell</span></li>
+    </ul>
+  </div>
+
+  <!-- STATUS -->
+  <div class="screen" id="s-status" hidden>
+    <div class="reading" id="statusLoading" role="status">
+      <span class="spin" aria-hidden="true"></span>
+      Checking&hellip;
+    </div>
+
+    <div id="statusEmpty" hidden>
+      <h2 class="ask">No report yet</h2>
+      <p class="hint" style="margin-top:12px">When you send a report it will show up here, on this phone.</p>
+    </div>
+
+    <div class="err" id="statusErr" hidden>
+      <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.2L21 19.4H3z"/><path d="M12 9.6v4M12 16.2v.2"/></svg>
+      <span id="statusErrText"></span>
+    </div>
+
+    <div id="statusBody" hidden>
+      <div class="slab" style="background:var(--surface)">
+        <div class="lbl">Your report</div>
+        <div class="huge" style="font-size:23px" id="stTitle"></div>
+        <div class="sub" id="stMeta"></div>
+        <div class="sub" id="stVehicle" hidden></div>
+      </div>
+      <ul class="trail" id="stTrail" style="margin-top:16px"></ul>
+    </div>
+
+    <button class="ghost" data-go="home" style="margin-top:auto">&larr; Back to start</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js"></script>
+<script src="plate-ocr.js"></script>
+<script src="api.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ================================================================
+     1. PASTE YOUR APPS SCRIPT WEB APP URL HERE
+     ================================================================ */
+  WasteWise.ENDPOINT = '';
+
+  /* ================================================================
+     2. ONE ENTRY PER QR STICKER
+        The sticker carries ?h=TP-01, so the resident never names a place.
+     ================================================================ */
+  var HOTSPOTS = {
+    'TP-01': 'Main Bin Area',
+    'TP-02': 'Stairwell 6A',
+    'TP-03': 'Back Lane',
+    'TP-04': 'Carpark Edge',
+    'TP-05': 'Level 3 Corridor'
+  };
+
+  var params = new URLSearchParams(location.search);
+  var hotspotId = (params.get('h') || '').toUpperCase();
+  var HOTSPOT = HOTSPOTS[hotspotId] || 'Block 6';
+
+  if (!WasteWise.ENDPOINT) document.getElementById('setupWarn').hidden = false;
+
+  var el = function (id) { return document.getElementById(id); };
+
+  el('hotspotName').textContent = HOTSPOT;
+  el('hotspotId').textContent = hotspotId ? 'Block 6 · Point ' + hotspotId : 'Desa Mentari';
+  el('hotspotEcho').textContent = HOTSPOT + ', Block 6';
+
+  /* ------------------------------------------------------------ state */
+
+  var draft = { photo: null, problem: null };
+  var lastReportNo = null;
+
+  /* ---------------------------------------------------------- screens */
+
+  var screens = {
+    home: el('s-home'), photo: el('s-photo'), kind: el('s-kind'),
+    done: el('s-done'), vehicle: el('s-vehicle'), plate: el('s-plate'),
+    schedule: el('s-schedule'), status: el('s-status')
+  };
+  var titles = {
+    home: ['WasteWise Connect', 'Block 6, Desa Mentari'],
+    photo: ['Report Rubbish', HOTSPOT],
+    kind: ['Report Rubbish', HOTSPOT],
+    done: ['Report Sent', 'Block 6, Desa Mentari'],
+    vehicle: ['Vehicle Plate', 'Optional'],
+    plate: ['Vehicle Plate', 'Optional'],
+    schedule: ['Collection Times', 'Block 6, Desa Mentari'],
+    status: ['Your Report', 'Block 6, Desa Mentari']
+  };
+  var backTo = {
+    photo: 'home', kind: 'photo', done: null,
+    vehicle: 'done', plate: 'vehicle', schedule: 'home', status: 'home'
+  };
+
+  var backBtn = el('back');
+  var barTitle = el('barTitle');
+  var current = 'home';
+
+  function show(name) {
+    Object.keys(screens).forEach(function (k) { screens[k].hidden = (k !== name); });
+    current = name;
+    var t = titles[name];
+    barTitle.textContent = t[0];
+    var s = document.createElement('small');
+    s.textContent = t[1];
+    barTitle.appendChild(s);
+    backBtn.hidden = !backTo[name];
+    screens[name].scrollTop = 0;
+    if (name === 'status') loadStatus();
+  }
+
+  document.addEventListener('click', function (e) {
+    var go = e.target.closest('[data-go]');
+    if (go) show(go.getAttribute('data-go'));
+  });
+  backBtn.addEventListener('click', function () {
+    if (backTo[current]) show(backTo[current]);
+  });
+
+  /* ------------------------------------------------- step 1: the photo */
+
+  var photoInput = el('photoInput');
+
+  el('startReport').addEventListener('click', function () { show('photo'); });
+  el('shoot').addEventListener('click', function () { photoInput.click(); });
+  el('retake').addEventListener('click', function () { photoInput.click(); });
+
+  photoInput.addEventListener('change', function () {
+    var file = photoInput.files && photoInput.files[0];
+    if (!file) return;
+
+    draft.photo = file;
+
+    var url = URL.createObjectURL(file);
+    var img = el('shotImg');
+    img.onload = function () { URL.revokeObjectURL(url); };
+    img.src = url;
+
+    el('shotStamp').textContent = HOTSPOT + ' · ' + timeNow();
+
+    hideSendError();
+    show('kind');
+  });
+
+  /* ---------------------------------------------- step 2: the problem */
+
+  var sendBtn = el('send');
+  var choices = [].slice.call(document.querySelectorAll('.choice'));
+
+  choices.forEach(function (c) {
+    c.addEventListener('click', function () {
+      choices.forEach(function (o) { o.setAttribute('aria-pressed', String(o === c)); });
+      draft.problem = c.getAttribute('data-kind');
+      sendBtn.disabled = false;
+    });
+  });
+
+  function setSending(on) {
+    sendBtn.disabled = on;
+    el('sendSpin').hidden = !on;
+    el('sendIcon').hidden = on;
+    el('sendLabel').textContent = on ? 'Sending…' : 'Send';
+  }
+  function showSendError(msg) {
+    el('sendErrText').textContent = msg;
+    el('sendErr').hidden = false;
+  }
+  function hideSendError() { el('sendErr').hidden = true; }
+
+  sendBtn.addEventListener('click', function () {
+    if (sendBtn.disabled || !draft.problem) return;
+
+    hideSendError();
+    setSending(true);
+
+    WasteWise.submit({ hotspot: HOTSPOT, problem: draft.problem, file: draft.photo })
+      .then(function (res) {
+        setSending(false);
+        if (!res.ok) { showSendError(friendly(res.error)); return; }
+
+        lastReportNo = res.reportNo;
+        WasteWise.remember(res.reportNo);
+        el('doneNo').textContent = 'Report no. ' + res.reportNo + ' · sent ' + timeNow();
+
+        /* Reset the draft only once it is safely filed. */
+        draft = { photo: null, problem: null };
+        choices.forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
+        sendBtn.disabled = true;
+
+        show('done');
+      })
+      .catch(function () {
+        setSending(false);
+        sendBtn.disabled = false;
+        showSendError('No connection. Your photo is still here — try again in a moment.');
+      });
+  });
+
+  /* -------------------------------------------- optional: the plate */
+
+  var plateInput = el('plateInput');
+  var found = null;
+
+  el('shootPlate').addEventListener('click', function () {
+    PlateOCR.warmUp();          /* start Tesseract's download while they aim */
+    plateInput.click();
+  });
+  el('retakePlate').addEventListener('click', function () { plateInput.click(); });
+
+  plateInput.addEventListener('change', function () {
+    var file = plateInput.files && plateInput.files[0];
+    if (!file) return;
+
+    var url = URL.createObjectURL(file);
+    var img = el('plateImg');
+    img.onload = function () { URL.revokeObjectURL(url); };
+    img.src = url;
+
+    show('plate');
+    readPlateFrom(file);
+  });
+
+  function readPlateFrom(file) {
+    found = null;
+    el('reading').hidden = false;
+    el('readingText').textContent = 'Reading the plate…';
+    el('result').hidden = true;
+    el('caution').hidden = true;
+    el('attach').disabled = true;
+    el('attachLabel').textContent = 'Add to report';
+
+    PlateOCR.fileToImage(file)
+      .then(function (img) { return PlateOCR.read(img); })
+      .then(function (r) {
+        el('reading').hidden = true;
+        el('caution').hidden = false;
+
+        if (r.ok) {
+          found = r;
+          el('plateOut').textContent = r.plate;
+          el('conf').textContent = r.confidence + '% confidence' +
+            (r.corrections ? ' · ' + r.corrections + ' character' +
+              (r.corrections > 1 ? 's' : '') + ' corrected' : '');
+          el('result').hidden = false;
+          el('cautionText').textContent =
+            'Management checks this against your photo before acting on it.';
+          el('attach').disabled = false;
+        } else {
+          el('cautionText').textContent =
+            'The plate was not clear enough to read. Try again closer, or send ' +
+            'it anyway — management can read the photo themselves.';
+          el('attach').disabled = false;
+          el('attachLabel').textContent = 'Skip the plate';
+        }
+      })
+      .catch(function () {
+        el('reading').hidden = true;
+        el('caution').hidden = false;
+        el('cautionText').textContent =
+          'Could not read the plate on this phone. Your report has already been sent.';
+        el('attach').disabled = false;
+        el('attachLabel').textContent = 'Skip the plate';
+      });
+  }
+
+  el('attach').addEventListener('click', function () {
+    var btn = el('attach');
+    if (btn.disabled) return;
+
+    if (!found || !lastReportNo) { show('status'); return; }
+
+    btn.disabled = true;
+    el('attachSpin').hidden = false;
+    el('attachLabel').textContent = 'Adding…';
+
+    WasteWise.addPlate(lastReportNo, found.plate)
+      .catch(function () { /* the report is already filed; the plate is a bonus */ })
+      .then(function () {
+        PlateOCR.dispose();
+        el('attachSpin').hidden = true;
+        el('attachLabel').textContent = 'Add to report';
+        btn.disabled = false;
+        show('status');
+      });
+  });
+
+  /* ------------------------------------------------------- the status */
+
+  function loadStatus() {
+    var mine = WasteWise.mine();
+    var no = lastReportNo || mine[mine.length - 1];
+
+    el('statusLoading').hidden = true;
+    el('statusEmpty').hidden = true;
+    el('statusErr').hidden = true;
+    el('statusBody').hidden = true;
+
+    if (!no) { el('statusEmpty').hidden = false; return; }
+
+    el('statusLoading').hidden = false;
+
+    WasteWise.status(no)
+      .then(function (s) {
+        el('statusLoading').hidden = true;
+        if (!s.ok) {
+          el('statusErrText').textContent = 'Report no. ' + no + ' could not be found.';
+          el('statusErr').hidden = false;
+          return;
+        }
+        renderStatus(s);
+        el('statusBody').hidden = false;
+      })
+      .catch(function () {
+        el('statusLoading').hidden = true;
+        el('statusErrText').textContent = 'No connection. Try again in a moment.';
+        el('statusErr').hidden = false;
+      });
+  }
+
+  function renderStatus(s) {
+    el('stTitle').textContent = 'No. ' + s.reportNo + ' · ' + s.problem;
+    el('stMeta').textContent = s.hotspot + ' · ' + stampOf(s.sentAt);
+
+    var reached = { New: 1, Received: 2, Assigned: 2, Cleared: 3, 'Not found': 1 };
+    var step = reached[s.status] || 1;
+
+    var rows = [
+      { what: 'Sent', when: stampOf(s.sentAt) },
+      {
+        what: 'Management received it',
+        when: s.assignedTo ? 'Given to ' + s.assignedTo : (step >= 2 ? 'Seen by management' : 'Not yet')
+      },
+      s.status === 'Not found'
+        ? { what: 'Nothing found', when: 'Management checked and the spot was already clear' }
+        : { what: 'Cleared', when: s.clearedAt ? stampOf(s.clearedAt) : 'Not yet' }
+    ];
+
+    if (s.status === 'Not found') step = 3;
+
+    var ul = el('stTrail');
+    ul.textContent = '';
+
+    rows.forEach(function (row, i) {
+      var done = (i + 1) <= step;
+
+      var li = document.createElement('li');
+      if (done) li.className = 'ok';
+
+      var mk = document.createElement('span');
+      mk.className = 'mk';
+      mk.innerHTML = done
+        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.8l4.4 4.4L19 7.6"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><circle cx="12" cy="12" r="3.4"/></svg>';
+
+      var box = document.createElement('div');
+      var what = document.createElement('div');
+      what.className = 'what';
+      what.textContent = row.what;
+      var when = document.createElement('div');
+      when.className = 'when';
+      when.textContent = row.when;
+      box.appendChild(what);
+      box.appendChild(when);
+
+      li.appendChild(mk);
+      li.appendChild(box);
+      ul.appendChild(li);
+    });
+  }
+
+  /* ------------------------------------------------------- utilities */
+
+  function timeNow() {
+    return new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+  function stampOf(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d)) return String(iso);
+    return d.toLocaleDateString([], { day: 'numeric', month: 'short' }) + ', ' +
+           d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+  /* Residents never see a raw server message. */
+  function friendly() {
+    return 'That did not send. Please try again.';
+  }
+
+  show('home');
+})();
+</script>
+</body>
+</html>
